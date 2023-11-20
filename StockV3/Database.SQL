@@ -1,0 +1,49 @@
+DROP SEQUENCE produitIdSeq;
+DROP SEQUENCE depotIdSeq;
+DROP SEQUENCE stockIdSeq;
+DROP TABLE depot;
+DROP TABLE produit;
+DROP TABLE stock;
+
+CREATE SEQUENCE produitIdSeq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE depotIdSeq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE stockIdSeq START WITH 1 INCREMENT BY 1;
+
+CREATE TABLE produit(
+    id NUMBER,
+    CONSTRAINT produitPK PRIMARY KEY(id),
+    nom VARCHAR(20)
+);
+
+CREATE TABLE depot(
+    id NUMBER,
+    CONSTRAINT depotPK PRIMARY KEY(id),
+    nom VARCHAR(20),
+    idProduit NUMBER,
+    CONSTRAINT depotFK FOREIGN KEY(idProduit) REFERENCES produit(id),
+    price NUMBER
+);
+
+CREATE TABLE stock(
+    id NUMBER,
+    CONSTRAINT stockPK PRIMARY KEY(id),
+    idProduit NUMBER,
+    CONSTRAINT stockPFK FOREIGN KEY(idProduit) REFERENCES produit(id),
+    idDepot NUMBER,
+    CONSTRAINT stockDFK FOREIGN KEY(idDepot) REFERENCES depot(id),
+    QtEntry NUMBER,
+    CONSTRAINT positiveNumberQtEntry CHECK (QtEntry>=0),
+    QtExit NUMBER,
+    CONSTRAINT positiveNumberQtExit CHECK (QtExit<=0),
+    currentStock NUMBER,
+    cump NUMBER (*,2),
+    dateStock DATE
+);
+
+INSERT INTO produit VALUES(produitIdSeq.NEXTVAL,'Ciptadent');
+INSERT INTO produit VALUES(produitIdSeq.NEXTVAL,'Maxam');
+
+INSERT INTO depot VALUES(depotIdSeq.NEXTVAL,'Andohoranofotsy',2,2500);
+INSERT INTO depot VALUES(depotIdSeq.NEXTVAL,'Andohoranofotsy',3,1300);
+INSERT INTO depot VALUES(depotIdSeq.NEXTVAL,'Tanjombato',2,2700);
+INSERT INTO depot VALUES(depotIdSeq.NEXTVAL,'Tanjombato',3,1600);
