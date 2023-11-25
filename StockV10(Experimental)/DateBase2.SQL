@@ -114,3 +114,13 @@ idMagasin,
 from Mouvement 
 INNER JOIN category ON mouvement.idCategory=category.id 
 GROUP BY category.nom,idCategory,idMagasin;
+
+select Produit.nom,
+idProduit,
+(SUM(Entree)-SUM(Sortie)) AS Reste,
+(SUM(Entree * Money)/SUM(Entree)) AS CUMP,
+((SUM(Entree * Money)/SUM(Entree))*(SUM(Entree)-SUM(Sortie))) AS Montant 
+from Mouvement 
+INNER JOIN produit ON mouvement.idProduit=produit.id
+GROUP BY produit.nom,idProduit
+ORDER BY idProduit;

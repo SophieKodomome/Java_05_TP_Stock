@@ -7,6 +7,7 @@ import java.util.*;
 
 import marchandise.*;
 import myUtil.*;
+import transaction.Mouvement;
 import connexion.*;
 
 public class PageEtatStock extends JFrame {
@@ -17,6 +18,7 @@ public class PageEtatStock extends JFrame {
     private ArrayList<JButton> buttonStockList = new ArrayList<>();
     private JPanel contentPanel = new JPanel(new GridLayout(etatStockList.size(), 1));
     private final JPanel footerPanel = new JPanel(new FlowLayout());
+    private ArrayList<Mouvement> min = DBCon.getListMouvementMin();
 
     public PageEtatStock() {
         this.setTitle("Page Etat Stock");
@@ -24,12 +26,23 @@ public class PageEtatStock extends JFrame {
         this.setSize(screenSize.width, screenSize.height);
         int i = 0;
         for (EtatStock instanceEtatStock : etatStockList) {
-            JButton button = new JButton("Nom: " + instanceEtatStock.getName() +
-                    " | IdProduit: " + instanceEtatStock.getIDProduit() + " | IdMagasin: "
-                    + instanceEtatStock.getIDMagasin() + " | Reste: "
-                    + instanceEtatStock.getReste() + " | Cump: " + instanceEtatStock.getCump() + " | Montant: "
-                    + instanceEtatStock.getMontant());
-            buttonStockList.add(button);
+
+            if (min.get(0).getIDProduit() == instanceEtatStock.getIDProduit()) {
+                JButton button = new JButton("Nom: " + instanceEtatStock.getName() +
+                        " | IdProduit: " + instanceEtatStock.getIDProduit() + " | IdMagasin: "
+                        + instanceEtatStock.getIDMagasin() + " | Reste: "
+                        + instanceEtatStock.getReste() + " | Cump: " + instanceEtatStock.getCump() + " | Montant: "
+                        + min.get(0).getMoney());
+                buttonStockList.add(button);
+            } else {
+                JButton button = new JButton("Nom: " + instanceEtatStock.getName() +
+                        " | IdProduit: " + instanceEtatStock.getIDProduit() + " | IdMagasin: "
+                        + instanceEtatStock.getIDMagasin() + " | Reste: "
+                        + instanceEtatStock.getReste() + " | Cump: " + instanceEtatStock.getCump() + " | Montant: "
+                        + instanceEtatStock.getMontant());
+                buttonStockList.add(button);
+            }
+
             contentPanel.add(buttonStockList.get(i)); // Add each button individually
             i++;
         }

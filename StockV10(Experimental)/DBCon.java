@@ -77,12 +77,45 @@ public class DBCon {
                 Mouvement mouvement = new Mouvement();
                 mouvement.setIDProduit(resultatMouvement.getInt("idProduit"));
                 mouvement.setIDCategory(resultatMouvement.getInt("idCategory"));
-                mouvement.setIDMagasin(resultatMouvement.getInt("idDepot"));
+                mouvement.setIDMagasin(resultatMouvement.getInt("idMagasin"));
                 mouvement.setEntree(resultatMouvement.getInt("entree"));
                 mouvement.setSortie(resultatMouvement.getInt("sortie"));
                 mouvement.setMoney(resultatMouvement.getInt("money"));
                 mouvement.setDateStock(resultatMouvement.getDate("datestock"));
                 mouvementList.add(mouvement);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return mouvementList;
+    }
+
+    public static ArrayList<Mouvement> getListMouvementMin() {
+        ArrayList<Mouvement> mouvementList = new ArrayList<>();
+
+        try {
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+
+            Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:orcl", "scott", "tiger");
+
+            Statement stmnt = con.createStatement();
+
+            ResultSet resultatMouvement = stmnt
+                    .executeQuery("select * from mouvement where idproduit=2 order by money");
+
+            while (resultatMouvement.next()) {
+                if (resultatMouvement.getInt("money") != 0) {
+                    Mouvement mouvement = new Mouvement();
+                    mouvement.setIDProduit(resultatMouvement.getInt("idProduit"));
+                    mouvement.setIDCategory(resultatMouvement.getInt("idCategory"));
+                    mouvement.setIDMagasin(resultatMouvement.getInt("idMagasin"));
+                    mouvement.setEntree(resultatMouvement.getInt("entree"));
+                    mouvement.setSortie(resultatMouvement.getInt("sortie"));
+                    mouvement.setMoney(resultatMouvement.getInt("money"));
+                    mouvement.setDateStock(resultatMouvement.getDate("datestock"));
+                    mouvementList.add(mouvement);
+                    break;
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -152,8 +185,44 @@ public class DBCon {
         return etatStockList;
     }
 
+    public static ArrayList<EtatProduit> getListEtatProduit() {
+        ArrayList<EtatProduit> etatProduitList = new ArrayList<>();
+        try {
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+
+            Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:orcl", "scott", "tiger");
+
+            Statement stmnt = con.createStatement();
+
+            ResultSet resultatEtatProduit = stmnt.executeQuery(
+                    "select Produit.nom,\r\n" + //
+                            "idProduit,\r\n" + //
+                            "(SUM(Entree)-SUM(Sortie)) AS Reste,\r\n" + //
+                            "(SUM(Entree * Money)/SUM(Entree)) AS CUMP,\r\n" + //
+                            "((SUM(Entree * Money)/SUM(Entree))*(SUM(Entree)-SUM(Sortie))) AS Montant \r\n" + //
+                            "from Mouvement \r\n" + //
+                            "INNER JOIN produit ON mouvement.idProduit=produit.id\r\n" + //
+                            "GROUP BY produit.nom,idProduit\r\n" + //
+                            "ORDER BY idProduit");
+
+            while (resultatEtatProduit.next()) {
+                EtatProduit etatProduit = new EtatProduit();
+                etatProduit.setName(resultatEtatProduit.getString("nom"));
+                etatProduit.setIDProduit(resultatEtatProduit.getInt("IdProduit"));
+                etatProduit.setReste(resultatEtatProduit.getInt("Reste"));
+                etatProduit.setCump(resultatEtatProduit.getDouble("cump"));
+                etatProduit.setMontant(resultatEtatProduit.getDouble("Montant"));
+                etatProduitList.add(etatProduit);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return etatProduitList;
+    }
+
     public static ArrayList<EtatCategory> getListEtatCategory() {
-        ArrayList<EtatCategory> etatStockList = new ArrayList<>();
+        ArrayList<EtatCategory> etatCategoryList = new ArrayList<>();
         try {
             Class.forName("oracle.jdbc.driver.OracleDriver");
 
@@ -179,13 +248,13 @@ public class DBCon {
                 etatStock.setCump(resultatEtatCategory.getDouble("cump"));
                 etatStock.setIDMagasin(resultatEtatCategory.getInt("IdMagasin"));
                 etatStock.setMontant(resultatEtatCategory.getDouble("Montant"));
-                etatStockList.add(etatStock);
+                etatCategoryList.add(etatStock);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return etatStockList;
+        return etatCategoryList;
     }
 
     public static void UpdateMouvement(Mouvement mouvement) {

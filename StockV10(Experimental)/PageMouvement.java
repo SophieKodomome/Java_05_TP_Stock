@@ -30,7 +30,7 @@ public class PageMouvement extends JFrame {
     ArrayList<Magasin> listMagasin = DBCon.getListMagasin();
     ArrayList<Produit> listProduit = DBCon.getListProduit();
     ArrayList<marchandise.Category> listCategories = DBCon.getListCategory();
-
+    ArrayList<EtatProduit> listEtatProduits = DBCon.getListEtatProduit();
     JTextField priceTextField = new JTextField(10);
     JTextField quantityTextField = new JTextField(10);
 
@@ -82,8 +82,21 @@ public class PageMouvement extends JFrame {
             public void actionPerformed(ActionEvent action) {
                 try {
                     Mouvement mouvement = getFilteredMouvement();
-                    DBCon.UpdateMouvement(mouvement);
-                    JOptionPane.showMessageDialog(null, "Insertion successfull!");
+                    if (mouvement.getSortie() <= 0) {
+                        if (mouvement.getMoney() < getMinPercentCump(mouvement)) {
+                            JOptionPane.showMessageDialog(null, "Money Inferior to Cump");
+                        } else {
+                            if (mouvement.getMoney() > getMaxPercentCump(mouvement)) {
+                                JOptionPane.showMessageDialog(null, "Money Above Cump");
+                            } else {
+                                DBCon.UpdateMouvement(mouvement);
+                                JOptionPane.showMessageDialog(null, "Insertion successful!");
+                            }
+                        }
+                    } else {
+                        DBCon.UpdateMouvement(mouvement);
+                        JOptionPane.showMessageDialog(null, "Insertion successful!");
+                    }
                 } catch (NegativeValueException eN) {
                     if (Integer.parseInt(quantityTextField.getText()) < 0) {
                         JOptionPane.showMessageDialog(null, "Quantity can't be negative");
@@ -125,6 +138,26 @@ public class PageMouvement extends JFrame {
 
         this.add(footerPanel, BorderLayout.SOUTH);
 
+    }
+
+    double getMaxPercentCump(Mouvement mouvement) {
+        double maxCump = 0;
+        for (EtatProduit instanceEtatProduit : listEtatProduits)
+            if (instanceEtatProduit.getIDProduit() == mouvement.getIDProduit()) {
+                maxCump = (instanceEtatProduit.getCump() * 20) / 100;
+                maxCump = instanceEtatProduit.getCump() + maxCump;
+            }
+        return maxCump;
+    }
+
+    double getMinPercentCump(Mouvement mouvement) {
+        double minCump = 0;
+        for (EtatProduit instanceEtatProduit : listEtatProduits)
+            if (instanceEtatProduit.getIDProduit() == mouvement.getIDProduit()) {
+                minCump = (instanceEtatProduit.getCump() * 20) / 100;
+                minCump = instanceEtatProduit.getCump() - minCump;
+            }
+        return minCump;
     }
 
     Mouvement getFilteredMouvement() throws NegativeValueException {
